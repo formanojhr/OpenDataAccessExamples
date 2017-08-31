@@ -28,8 +28,7 @@ import java.util.logging.Logger;
 @Ignore
 public class SimpleWebsocketTest {
     private MyWsHandler myWsHandler = new MyWsHandler();
-    private static final int PING_TIME_INTERVAL = (int) TimeUnit.SECONDS.toSeconds(3);
-    private static final String PARTNER_ID= "partner_id";
+    private static final int PING_TIME_INTERVAL = (int) TimeUnit.SECONDS.toSeconds(10);
     private static final String APP_ID= "appId";
     private static final String TENANT_API_CODE= "tenantApiCode";
 
@@ -42,26 +41,26 @@ public class SimpleWebsocketTest {
             //These headers are mandatory for authenticating on the ODA ws api
             WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
             //localhost
-            headers.set(APP_ID,
-                    "780e186e-cd2e-440b-9618-9cb780ee67f1");
-            //Add tenant api code
-            headers.set(TENANT_API_CODE,
-                    "4df221a5-7956-4e35-9bce-1c257fdde785");
+//            headers.set(APP_ID,
+//                    "780e186e-cd2e-440b-9618-9cb780ee67f1");
+//            //Add tenant api code
+//            headers.set(TENANT_API_CODE,
+//                    "4df221a5-7956-4e35-9bce-1c257fdde785");
 
             //Add appId
-//            headers.set(com.plantronics.platform.common.constants.Constants.APP_ID,
-//                    "d0f76331-c55e-442a-9f3b-aa86cf157fde");
-//            //Add tenant api code
-//            headers.set(Constants.TENANT_API_CODE,
-//                    "b14710bf-d192-466e-aeef-b67f56c9ea9b");
+            headers.set(APP_ID,
+                    "d0f76331-c55e-442a-9f3b-aa86cf157fde");
+            //Add tenant api code
+            headers.set(TENANT_API_CODE,
+                    "b14710bf-d192-466e-aeef-b67f56c9ea9b");
             WebSocketClient sockJsClient = new SockJsClient(transports);
             WebSocketClient standardWebSocketClient = new StandardWebSocketClient();
 //            ListenableFuture<WebSocketSession> sessionListenableFuture = sockJsClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
 //                    URI.create("ws://localhost:8060/start"));
-            ListenableFuture<WebSocketSession> sessionListenableFuture = standardWebSocketClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
-                    URI.create("ws://localhost:8060/start"));
 //            ListenableFuture<WebSocketSession> sessionListenableFuture = standardWebSocketClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
-//                    URI.create("wss://test-partner-api.preview.pltzone.org/start"));
+//                    URI.create("ws://localhost:8060/start"));
+            ListenableFuture<WebSocketSession> sessionListenableFuture = standardWebSocketClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
+                    URI.create("wss://test-partner-api.preview.pltzone.org/start"));
             WebSocketSession session = sessionListenableFuture.get();
             Assert.assertNotNull(session);
             Thread.sleep(600000);
@@ -71,9 +70,12 @@ public class SimpleWebsocketTest {
         }
     }
 
+    /**
+     * A websocket session handler.
+     */
     public class MyWsHandler implements WebSocketHandler {
         private Logger logger = Logger.getLogger(String.valueOf(MyWsHandler.class));
-        private ScheduledExecutorService executorService=Executors.newScheduledThreadPool(2);
+        private ScheduledExecutorService executorService=Executors.newScheduledThreadPool(1);
 
         @Override
         public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -123,18 +125,8 @@ public class SimpleWebsocketTest {
         return new TextMessage(pingMessage.toString());
     }
 
-
-
-    private final Runnable PingTask = new Runnable() {
-
-        @Override
-        public void run() {
-
-        }
-    };
-
     /**
-     * A runnable to push a ping message from client
+     * A runnable to push a ping message from client to keep session alive with server.
      */
     private class PingTask implements Runnable{
         private WebSocketSession session;
