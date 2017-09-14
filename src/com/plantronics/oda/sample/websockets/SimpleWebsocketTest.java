@@ -9,7 +9,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
@@ -35,6 +34,19 @@ public class SimpleWebsocketTest {
 
     public static void main(String[] args) {
         try {
+            String appId=args[0];
+            String tenantId=args[1];
+            String webSocketAdd=args[2];
+            if(args[0] == null){
+                System.out.println("Bad input arg 0! Please enter appId.");
+            }
+            if(args[1] == null){
+                System.out.println("Bad input arg 1! Please enter tenantId.");
+            }
+            if(args[2] == null){
+                System.out.println("Bad input arg 2! Please enter webSocketAdd.");
+            }
+            System.out.println("Creating websocket client connection in ws URI :..." +webSocketAdd);
             SimpleWebsocketTest simpleWebsocketTest = new SimpleWebsocketTest();
             Transport webSocketTransport = new WebSocketTransport(new StandardWebSocketClient());
             List<Transport> transports = Collections.singletonList(webSocketTransport);
@@ -46,21 +58,34 @@ public class SimpleWebsocketTest {
 //            //Add tenant api code
 //            headers.set(TENANT_API_CODE,
 //                    "4df221a5-7956-4e35-9bce-1c257fdde785");
-
-            //Add appId
-            headers.set(APP_ID,
-                    "d0f76331-c55e-442a-9f3b-aa86cf157fde");
+            System.out.println("Setting headers : appId "+ appId + "tenantApiCode "+tenantId);
+             headers.set(APP_ID,
+                    appId);
             //Add tenant api code
             headers.set(TENANT_API_CODE,
-                    "b14710bf-d192-466e-aeef-b67f56c9ea9b");
-            WebSocketClient sockJsClient = new SockJsClient(transports);
+                    tenantId);
+
+            //Add appId
+//            headers.set(APP_ID,
+//                    "d0f76331-c55e-442a-9f3b-aa86cf157fde");
+//            //Add tenant api code
+//            headers.set(TENANT_API_CODE,
+//                    "b14710bf-d192-466e-aeef-b67f56c9ea9b");
+
+//            headers.set(APP_ID,
+//                    "97f17880-507c-4832-b686-1248d53cc9d7");
+//            //Add tenant api code
+//            headers.set(TENANT_API_CODE,
+//                    "6082fda6-fd3f-456c-8acc-56bd36e6fb60");
             WebSocketClient standardWebSocketClient = new StandardWebSocketClient();
 //            ListenableFuture<WebSocketSession> sessionListenableFuture = sockJsClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
 //                    URI.create("ws://localhost:8060/start"));
-//            ListenableFuture<WebSocketSession> sessionListenableFuture = standardWebSocketClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
-//                    URI.create("ws://localhost:8060/start"));
             ListenableFuture<WebSocketSession> sessionListenableFuture = standardWebSocketClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
-                    URI.create("wss://test-partner-api.preview.pltzone.org/start"));
+                    URI.create(webSocketAdd));
+//            ListenableFuture<WebSocketSession> sessionListenableFuture = standardWebSocketClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
+//                    URI.create("wss://test-partner-api.preview.pltzone.org/start"));
+//            ListenableFuture<WebSocketSession> sessionListenableFuture = standardWebSocketClient.doHandshake(simpleWebsocketTest.myWsHandler, headers,
+//                    URI.create("wss://partner-api.nectar.pltzone.org/start"));
             WebSocketSession session = sessionListenableFuture.get();
             Assert.assertNotNull(session);
             Thread.sleep(600000);
